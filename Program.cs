@@ -1,4 +1,9 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MvcPicoPublish.Data;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<MvcPicoPublishContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("MvcPicoPublishContext") ?? throw new InvalidOperationException("Connection string 'MvcPicoPublishContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

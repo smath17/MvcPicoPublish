@@ -20,10 +20,34 @@ namespace MvcPicoPublish.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(int? pageNumber)
+        public async Task<IActionResult> Index(int? pageNumber, string sortOrder)
         {
+            // 10 Items per page
             int pageSize = 10;
-            return View(await PaginatedList<Product>.CreateAsync(_context.Product.AsNoTracking(), pageNumber ?? 1, pageSize));
+            // Keep current sorting when paging
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["IdSortParm"] = string.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
+            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+            // Get Queryable from DbSet
+            var products = from p in _context.Product select p;
+
+            switch (sortOrder)
+            {
+                case "id_desc":
+                    products = products.OrderByDescending(p => p.Id);
+                    break;
+                case "name":
+                    products = products.OrderBy(p => p.Name);
+                    break;
+                case "name_desc":
+                    products = products.OrderByDescending(p => p.Name);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Id);
+                    break;
+            }
+
+            return View(await PaginatedList<Product>.CreateAsync(products.AsNoTracking(), pageNumber ?? 1, pageSize));
             // return View(await _context.Product.ToListAsync());
         }
 
